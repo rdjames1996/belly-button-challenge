@@ -26,7 +26,9 @@ function init() {
 
         console.log(sample_one);
 
-        
+        metadata(sample_one);
+        barchart(sample_one);
+        bubblechart(sample_one);
         
     });
 };
