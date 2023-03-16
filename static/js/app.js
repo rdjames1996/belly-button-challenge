@@ -91,3 +91,51 @@ function barchart(sample) {
     });
 };
 
+function bubblechart(sample) {
+
+    d3.json(url).then((data) => {
+
+        let sampleinfo = data.samples;
+
+        let value = sampleinfo.filter(result => result.id == sample);
+
+        let infodata = value[0];
+
+        let otu_ids = sampleinfo.otu_ids;
+        let otu_labels = sampleinfo.otu_labels;
+        let sample_values = sampleinfo.sample_values;
+
+        console.log(otu_ids,otu_labels,sample_values);
+
+        let trace_bubble = {
+            x: otu_ids,
+            y: sample_values,
+            text: otu_labels,
+            mode: "markers",
+            marker: {
+                size: sample_values,
+                color: otu_ids,
+                colorscale: "Electric"
+            }
+        };
+
+        let layout = {
+            title: "Sample Information",
+            xaxis: {title: "OTU ID"},
+            hovermode: "closest",
+        };
+
+        Plotly.newPlot("bubble", [trace_bubble], layout)
+    });
+};
+
+function changeid(value) {
+
+    console.log(value);
+
+    metadata(value);
+    barchart(value);
+    bubblechart(value);
+};
+
+init();
