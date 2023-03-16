@@ -1,75 +1,93 @@
-function dropdown(){
-    d3.json("./samples.json").then(data => {
-        var sampleName = data.names;
-        var dataid = d3.select("#selDataset")
-        sampleName.forEach((sampleid)=> {
-            dataid.append("option")
-                .text(sampleid)
-                .property("value", sampleid)
-        })
-        var firstSample = sampleName[0];
-        metadata(firstSample);
-        Charts(firstSample);
-    // console.log(sampleId)
+const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
+
+// Grabbing JSON then console logging it.
+d3.json(url).then(function(data) {
+    console.log(data);
+});
+
+function init() {
+
+    let dropdown = d3.select("#selDataset");
+
+    d3.json(url).then((data) => {
+
+        let names = data.names;
+
+        names.foreach((id) => {
+
+            console.log(id);
+
+            dropdown.append("option")
+            .text(id)
+            .property("value",id);
+        });
+
+        let sample_one = names[0];
+
+        console.log(sample_one);
+
+        metadata(sample_one);
+        barchart(sample_one);
+        bubblechart(sample_one);
+        
     });
 };
 
-dropdown();
+function metadata(sample) {
 
-function metadata(id) {
-    d3.json("./samples.json").then(data => {
-        var sampleMetadata = data.metadata;
-        var result = sampleMetadata.filter(obj => obj.id == id);
-        var filterresult = result[0];
-        var display = d3.select("#sample-metadata");
-        display.html("");
-        Object.entries(filterresult).forEach(([key, value]) => {
-            display.append("h6").text(`${key} ${value}`);
+    d3.json(url).then((data) => {
+
+        let metadata = data.metadata;
+
+        let info = metadata.filter(result => result.id == sample);
+
+        console.log(info)
+
+        let infodata = info[0];
+
+        d3.select("#sample-metadata").html("");
+
+        Object.entries(infodata).foreach(([key,value]) => {
+            console.log(key,value);
+
+            d3.select("#sample-metadata").append("h5").text(`${key}: ${value}`);
         });
     });
-}
+};
 
-// Use sample_values as the values for the bar chart.
-// Use otu_ids as the labels for the bar chart.
-// Use otu_labels as the hovertext for the chart.
+function barchart(sample) {
 
-function Charts(id){
-    d3.json("./samples.json").then(data => {
-        var sampledata = data.samples;
-        var result = sampledata.filter(obj => obj.id == id);
-        var filterresult = result[0];
-        var otu_ids = filterresult.otu_ids;
-        var otu_labels = filterresult.otu_labels;
-        var sample_values = filterresult.sample_values;
+    d3.json(url).then((data) => {
 
-        var bubbledata = [{
-            x: otu_ids,
-            y: sample_values,
-            text: otu_labels,
-            mode: "markers",
-            marker: {
-                size: sample_values,
-                color: otu_ids,
-                colorscale: "Picnic"
-            }
-        }];
-        
-        var barData = [{
-            y: otu_ids.slice(0, 10).map(val => `OTU ${val}`).reverse(),
-            x: sample_values.slice(0, 10).reverse(),
-            text: otu_labels.slice(0, 10).reverse(),
+        let sampleinfo = data.samples;
+
+        let value = sampleinfo.filter(result => result.id == sample);
+
+        let infodata = value[0];
+
+        let otu_ids = infodata.otu_ids;
+        let otu_labels = infodata.otu_labels;
+        let sample_values = infodata.sample_values
+
+        console.log(otu_ids,otu_labels,sample_values);
+
+        let yticks = otu_ids.slice(0,10).map(id => `OTU ${id}`).reverse();
+        let xticks = sample_values.slice(0,10).reverse();
+        let labels = otu_labels.slice(0,10).reverse();
+
+        let trace = {
+            x: xticks,
+            y: yticks,
+            text: labels,
             type: "bar",
-            orientation: "h",
-            border: 2
-        }];
+            orientation: "h"
+        };
 
-        Plotly.newPlot("bar", barData);
+        let layout = {
+            title: "top 10 OTUs found in the Individual"
+        };
 
-        Plotly.newPlot("bubble", bubbledata);
+        Plotly.newPlot("bar", [trace], layout)
     });
 };
 
-function optionChanged(changeid) {
-    metadata(changeid);
-    Charts(changeid);
-};
